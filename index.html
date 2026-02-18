@@ -645,12 +645,97 @@ body > div.Section1 > table.MsoNormalTable > tbody > tr:first-child > td:first-c
 	display: none !important;
 }
 
+/* --- Publication Search Bar --- */
+.pub-search-container {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+	padding: 16px 0 12px;
+	margin-bottom: 16px;
+	border-bottom: 1px solid #e2e8f0;
+}
+
+.pub-search-wrapper {
+	position: relative;
+	max-width: 100%;
+}
+
+.pub-search-wrapper svg {
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	color: #94a3b8;
+}
+
+#pub-search-input {
+	width: 100%;
+	padding: 12px 16px 12px 42px;
+	font-size: 15px;
+	font-family: 'Inter', sans-serif;
+	border: 2px solid #e2e8f0;
+	border-radius: 12px;
+	background: #ffffff;
+	color: #1e293b;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#pub-search-input:focus {
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+#pub-search-input::placeholder {
+	color: #94a3b8;
+}
+
+.pub-search-stats {
+	margin-top: 8px;
+	font-size: 13px;
+	color: #64748b;
+	font-family: 'Inter', sans-serif;
+}
+
+.pub-search-stats .highlight {
+	font-weight: 600;
+	color: #3b82f6;
+}
+
+.pub-search-clear {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: #94a3b8;
+	padding: 4px;
+	border-radius: 50%;
+	display: none;
+	line-height: 0;
+	transition: color 0.15s ease, background 0.15s ease;
+}
+
+.pub-search-clear:hover {
+	color: #475569;
+	background: #f1f5f9;
+}
+
+.pub-li-hidden {
+	display: none !important;
+}
+
 /* --- Print styles --- */
 @media print {
 	body { background: white; }
 	body > div.Section1 > table.MsoNormalTable { box-shadow: none; }
 	.content-section { display: block !important; }
 	tr[data-section] { display: table-row !important; }
+	.pub-search-container { display: none !important; }
 }
 </STYLE>
 
@@ -912,13 +997,9 @@ body > div.Section1 > table.MsoNormalTable > tbody > tr:first-child > td:first-c
         <TBODY>
         <TR>
           <TD vAlign=top style="width: 71px">
-            <P class=MsoNormal>
-			<IMG height=12 
-            src="redarrow.gif" width=17 
-            border=0></P></TD>
+            <a name=publication></a>
+			</TD>
           <TD align=justify width=683>
-            <P class=auto-style35><a name=publication><I>PUBLICATIONS </I></a><I>
-			(before&nbsp; 2000)</I></P>
 			<OL>
               <LI>
               <P class="auto-style34"><em>Meybodi, M. R. and S. Lakshmivarahn, 
@@ -1192,17 +1273,11 @@ body > div.Section1 > table.MsoNormalTable > tbody > tr:first-child > td:first-c
 				Iranian Conference on Electrical Engineering,&nbsp; pp. 1-15, ITRC, 
 				Tehran, Iran, May 17-19, 1999(<a href="https://m-meybodi.github.io/papers-2/Meybodi-Beigy-7th%20ICEE-1999-New%20Learning---.pdf">PDF</a>).</em></li>
 			</OL></TD></TR>
-        <TR>
+        <TR style="display:none">
           <TD vAlign=top style="width: 71px">
-            <p class="auto-style34">
-            <IMG height=12 
-            src="redarrow.gif" width=17 
-            border=0></p>
 			</TD>
           <TD align=justify width=683>
-            <p class="auto-style34">
-            <a name=publication2><B><I>PUBLICATIONS </I></B>
-			<a name=publication1><B><I>( After 2000 )</I></B></p>
+            <a name=publication2></a><a name=publication1></a>
 			</TD></TR>
         <TR>
           <TD vAlign=top style="width: 71px">
@@ -26045,6 +26120,118 @@ document.addEventListener('DOMContentLoaded', function() {
 	} else {
 		showSection('academicpreparation');
 	}
+
+	// === Publication Search Bar ===
+	(function() {
+		var pubSections = sectionMap['publication'];
+		if (!pubSections || pubSections.length === 0) return;
+
+		// Create search bar HTML
+		var searchContainer = document.createElement('div');
+		searchContainer.className = 'pub-search-container';
+		searchContainer.innerHTML =
+			'<div class="pub-search-wrapper">' +
+				'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+				'<input type="text" id="pub-search-input" placeholder="Search publications by title, author, year, keyword..." autocomplete="off">' +
+				'<button class="pub-search-clear" id="pub-search-clear" title="Clear search">' +
+					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+				'</button>' +
+			'</div>' +
+			'<div class="pub-search-stats" id="pub-search-stats"></div>';
+
+		// Insert search bar at the top of the first publication section
+		var firstPubSection = pubSections[0];
+		firstPubSection.insertBefore(searchContainer, firstPubSection.firstChild);
+
+		// Gather all LI elements from all publication sections
+		var allPapers = [];
+		pubSections.forEach(function(section) {
+			var lis = section.querySelectorAll('ol > li, OL > LI, OL > li, ol > LI');
+			lis.forEach(function(li) {
+				allPapers.push({
+					el: li,
+					text: (li.textContent || li.innerText || '').toLowerCase()
+				});
+			});
+		});
+
+		var totalPapers = allPapers.length;
+		var searchInput = document.getElementById('pub-search-input');
+		var clearBtn = document.getElementById('pub-search-clear');
+		var statsEl = document.getElementById('pub-search-stats');
+
+		// Show initial count
+		statsEl.innerHTML = 'Total: <span class="highlight">' + totalPapers + '</span> publications';
+
+		// Debounce helper
+		var debounceTimer;
+		function debounce(fn, delay) {
+			return function() {
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(fn, delay);
+			};
+		}
+
+		function filterPapers() {
+			var query = searchInput.value.trim().toLowerCase();
+			clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+			if (query.length === 0) {
+				// Show all
+				allPapers.forEach(function(p) {
+					p.el.classList.remove('pub-li-hidden');
+				});
+				statsEl.innerHTML = 'Total: <span class="highlight">' + totalPapers + '</span> publications';
+				// Show all section headers/wrappers
+				pubSections.forEach(function(s) { s.style.display = ''; });
+				return;
+			}
+
+			// Split query into words for AND matching
+			var terms = query.split(/\s+/).filter(function(t) { return t.length > 0; });
+			var matchCount = 0;
+
+			allPapers.forEach(function(p) {
+				var matches = terms.every(function(term) {
+					return p.text.indexOf(term) !== -1;
+				});
+				if (matches) {
+					p.el.classList.remove('pub-li-hidden');
+					matchCount++;
+				} else {
+					p.el.classList.add('pub-li-hidden');
+				}
+			});
+
+			statsEl.innerHTML = 'Showing <span class="highlight">' + matchCount + '</span> of <span class="highlight">' + totalPapers + '</span> publications';
+
+			// Make sure all pub sections are visible when searching
+			pubSections.forEach(function(s) { s.style.display = ''; });
+		}
+
+		searchInput.addEventListener('input', debounce(filterPapers, 200));
+
+		clearBtn.addEventListener('click', function() {
+			searchInput.value = '';
+			clearBtn.style.display = 'none';
+			filterPapers();
+			searchInput.focus();
+		});
+
+		// Clear search when navigating away from publications
+		var origShowSection = showSection;
+		showSection = function(name) {
+			if (name !== 'publication' && searchInput.value.trim().length > 0) {
+				searchInput.value = '';
+				clearBtn.style.display = 'none';
+				allPapers.forEach(function(p) {
+					p.el.classList.remove('pub-li-hidden');
+				});
+				statsEl.innerHTML = 'Total: <span class="highlight">' + totalPapers + '</span> publications';
+			}
+			origShowSection(name);
+		};
+	})();
 });
 </script>
 </BODY>
