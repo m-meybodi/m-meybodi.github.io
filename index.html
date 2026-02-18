@@ -729,6 +729,19 @@ body > div.Section1 > table.MsoNormalTable > tbody > tr:first-child > td:first-c
 	display: none !important;
 }
 
+/* --- Make publication tables use full width --- */
+.content-section[data-section="publication"] table.MsoNormalTable {
+	width: 100% !important;
+}
+
+.content-section[data-section="publication"] table.MsoNormalTable td[style*="width: 71px"] {
+	display: none;
+}
+
+.content-section[data-section="publication"] table.MsoNormalTable td[width="683"] {
+	width: 100% !important;
+}
+
 /* --- Print styles --- */
 @media print {
 	body { background: white; }
